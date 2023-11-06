@@ -1,0 +1,34 @@
+
+library(readr)
+train <- read_csv("PDS2/raw data/train.csv")
+View(train)
+
+#There are plenty of NA rows in NEW_Price so if I remove each NA row the data set will be comprised had replaced the NA with the median value.
+train$New_Price=ifelse(is.na(train$New_Price),median(train$New_Price,na.rm = TRUE),train$New_Price)
+View(train)
+
+#kmpl value are removed from mileage and replaced with NA then NA rows in Mileage is replaced with mean value.
+train$Mileage <- as.numeric(gsub(" kmpl", "", train$Mileage))
+train$Mileage=ifelse(is.na(train$Mileage), mean(train$Mileage, na.rm=TRUE),train$Mileage)
+View(train)
+
+#CC value in Engine is replaced with numeric value and bhp value in power is replaced with numeric value.
+train$Engine <- as.numeric(gsub(" CC", "",train$Engine))
+train$Power <- as.numeric(gsub(" bhp", "",train$Power))
+view(train)
+
+#Clean data
+clean_traindata <- read_csv("PDS2/clean_data/clean_traindata.csv")
+View(clean_traindata)
+
+#Changed categorical variables Fuel_Type and Transmission into numerical encoded value.
+library(caret)
+train_encodevalue <- cbind(clean_traindata, model.matrix(~ Fuel_Type + Transmission - 1, data=clean_traindata))
+train_encodevalue <- train_encodevalue[, !(names(clean_traindata) %in% c("Fuel_Type", "Transmission"))]
+head(train_encodevalue)
+
+#created new column Current_Age from which we will get the age of the car
+current_year <- as.numeric(format(Sys.Date(), "%Y"))
+train$Current_Age <- current_year - train$Year
+
+ 
